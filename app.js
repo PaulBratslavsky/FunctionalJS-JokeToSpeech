@@ -37,8 +37,8 @@ function createButton(className, value, onClick) {
     return buttonNode
 }
 
-function createTextContainer(id, className) {
-    const containerNode = createNodeElement('div', [className], 'null', null)
+function createTextContainer(id, className, model) {
+    const containerNode = createNodeElement('div', [className], model.text, null)
     containerNode.id = id;
     return containerNode;
 }
@@ -55,7 +55,6 @@ function createAudio(className, src,) {
 ***********************************************/
 
 const data = {
-    status: '',
     id: '',
     text: 'Click Button to hear joke!'
 };
@@ -64,10 +63,10 @@ const data = {
     VIEW
 ***********************************************/
 
-function view(fn) {
+function view(fn, model) {
     return createNodeElement('div', ['main'], null, [
         createButton(['button'], 'click me', () => fn('get-data')),
-        createTextContainer(['text-container'], 'text-container'),
+        createTextContainer(['text-container'], 'text-container', model),
         createAudio(['audio']),
     ]);
 }
@@ -81,8 +80,8 @@ async function update(event, model) {
         case 'get-data': 
             const result = await getJokeFromAPI()
             const { id, joke } = result.value
-            const data = { ...model, status: result.status, id, text: joke }
-            document.getElementById('text-container').innerHTML = data.text
+            const data = { ...model, id, text: joke }
+            return data
         default:
             return model
     }
@@ -110,8 +109,8 @@ function App(node,view,initModel) {
     node.appendChild(currentView)
 
    // Dispatch function triggers update
-   function dispatch(msg) {
-        model = update(msg, model)
+   async function dispatch(msg) {
+        model = await update(msg, model)
 
         // Updates HTML veiw
         const updatedView = view(dispatch, model)
@@ -121,7 +120,10 @@ function App(node,view,initModel) {
 
         // Sets current view to updated view
         currentView = updatedView
+        console.log(model)
+
     }
+
 }
 
 const node = document.getElementById('root')
