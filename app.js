@@ -1,8 +1,36 @@
 /***********************************************
-  VARIABLES
+  VoiceRSS API
+***********************************************/
+
+"use strict";const VoiceRSS={speech:function(e){this._validate(e),this._request(e)},_validate:function(e){if(!e)throw"The settings are undefined";if(!e.key)throw"The API key is undefined";if(!e.src)throw"The text is undefined";if(!e.hl)throw"The language is undefined";if(e.c&&"auto"!=e.c.toLowerCase()){var a=!1;switch(e.c.toLowerCase()){case"mp3":a=(new Audio).canPlayType("audio/mpeg").replace("no","");break;case"wav":a=(new Audio).canPlayType("audio/wav").replace("no","");break;case"aac":a=(new Audio).canPlayType("audio/aac").replace("no","");break;case"ogg":a=(new Audio).canPlayType("audio/ogg").replace("no","");break;case"caf":a=(new Audio).canPlayType("audio/x-caf").replace("no","")}if(!a)throw"The browser does not support the audio codec "+e.c}},_request:function(e){var a=this._buildRequest(e),t=this._getXHR();t.onreadystatechange=function(){if(4==t.readyState&&200==t.status){if(0==t.responseText.indexOf("ERROR"))throw t.responseText;new Audio(t.responseText).play()}},t.open("POST","https://api.voicerss.org/",!0),t.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8"),t.send(a)},_buildRequest:function(e){var a=e.c&&"auto"!=e.c.toLowerCase()?e.c:this._detectCodec();return"key="+(e.key||"")+"&src="+(e.src||"")+"&hl="+(e.hl||"")+"&v="+(e.v||"")+"&r="+(e.r||"")+"&c="+(a||"")+"&f="+(e.f||"")+"&ssml="+(e.ssml||"")+"&b64=true"},_detectCodec:function(){var e=new Audio;return e.canPlayType("audio/mpeg").replace("no","")?"mp3":e.canPlayType("audio/wav").replace("no","")?"wav":e.canPlayType("audio/aac").replace("no","")?"aac":e.canPlayType("audio/ogg").replace("no","")?"ogg":e.canPlayType("audio/x-caf").replace("no","")?"caf":""},_getXHR:function(){try{return new XMLHttpRequest}catch(e){}try{return new ActiveXObject("Msxml3.XMLHTTP")}catch(e){}try{return new ActiveXObject("Msxml2.XMLHTTP.6.0")}catch(e){}try{return new ActiveXObject("Msxml2.XMLHTTP.3.0")}catch(e){}try{return new ActiveXObject("Msxml2.XMLHTTP")}catch(e){}try{return new ActiveXObject("Microsoft.XMLHTTP")}catch(e){}throw"The browser does not support HTTP request"}};
+function talk(msg) {
+    VoiceRSS.speech({
+        key: 'f778c3d5a3464c02b00bdcfd41c01f20',
+        src: msg,
+        hl: 'en-us',
+        v: 'Linda',
+        r: 0, 
+        c: 'mp3',
+        f: '44khz_16bit_stereo',
+        ssml: false
+    }) 
+}
+
+/***********************************************
+  Chuck Norris API
 ***********************************************/
 
 const chuckNorrisAPI = 'https://api.icndb.com/jokes/random';
+
+
+async function getJokeFromAPI() {
+    try {      
+        const request = await fetch(chuckNorrisAPI);
+        return await request.json();
+    } catch (err) {
+        console.error(`Something went wrong: ${err}`)
+    }
+}
 
 /***********************************************
     HELPER FUNCTIONS
@@ -43,13 +71,6 @@ function createTextContainer(id, className, model) {
     return containerNode;
 }
 
-function createAudio(className, src,) {
-    let audioNode = createNodeElement('audio', className, null, null)
-    if (src) audioNode.src = src
-    audioNode.controls = 'controls'
-    return audioNode
-}
-
 /***********************************************
     MODEL
 ***********************************************/
@@ -67,7 +88,6 @@ function view(fn, model) {
     return createNodeElement('div', ['main'], null, [
         createButton(['button'], 'click me', () => fn('get-data')),
         createTextContainer(['text-container'], 'text-container', model),
-        createAudio(['audio']),
     ]);
 }
 
@@ -90,17 +110,6 @@ async function update(event, model) {
 /***********************************************
     DIRTY FUNCTIONS
 ***********************************************/
-async function getJokeFromAPI() {
-
-    try {      
-        const request = await fetch(chuckNorrisAPI);
-        const result = await request.json();
-        return result
-    } catch (err) {
-        console.error(`Something went wrong: ${err}`)
-    }
-
-}
 
 function App(node,view,initModel) {
 
@@ -120,8 +129,7 @@ function App(node,view,initModel) {
 
         // Sets current view to updated view
         currentView = updatedView
-        console.log(model)
-
+        talk(model.text)
     }
 
 }
